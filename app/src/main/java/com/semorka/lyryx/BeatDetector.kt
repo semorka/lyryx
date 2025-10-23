@@ -24,15 +24,13 @@ class BeatDetector {
                                 val right = waveform[1].toInt() and 0xFF
                                 val amplitude = kotlin.math.max(left, right)
 
-                                // ВАЖНО: используем текущее время ПЛЕЕРА, а не системное!
                                 val currentPlayerTime = mediaPlayer.currentPosition.toLong()
 
                                 if (amplitude > 130 &&
                                     currentPlayerTime - lastBeatTime > 400L) {
 
                                     lastBeatTime = currentPlayerTime
-                                    Log.d("BEAT", "Бит обнаружен! Амплитуда: $amplitude, Время: $currentPlayerTime")
-                                    onBeatDetected(currentPlayerTime) // Передаем время плеера!
+                                    onBeatDetected(currentPlayerTime)
                                 }
                             }
                         }
