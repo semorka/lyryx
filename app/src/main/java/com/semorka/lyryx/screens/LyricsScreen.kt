@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -41,6 +42,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.semorka.lyryx.BeatDetector
 import com.semorka.lyryx.music.Music
+import com.semorka.lyryx.ui.theme.LyryxTheme
 import kotlinx.coroutines.delay
 import kotlin.text.ifEmpty
 
@@ -55,7 +57,6 @@ fun LyricsScreen(navController: NavController, music: Music, audioUri: Uri?, isP
 
     val onsetTimestamps = remember { mutableStateListOf<Long>() }
     var lastOnsetTime by remember { mutableStateOf(0L) }
-    val minBeatInterval = 280L
 
     val syncedLines = remember(music.syncedLyrics) {
         music.syncedLyrics?.let { text ->
@@ -198,9 +199,9 @@ fun LyricsScreen(navController: NavController, music: Music, audioUri: Uri?, isP
 
     val animatedTextColor by animateColorAsState(
         targetValue = when {
-            isOnsetActive -> Color.DarkGray
-            lineChanged -> Color.LightGray
-            else -> Color.Black
+            isOnsetActive -> MaterialTheme.colorScheme.primary.copy(0.8f)
+            lineChanged -> MaterialTheme.colorScheme.primary.copy(0.5f)
+            else -> MaterialTheme.colorScheme.primary
         },
         animationSpec = tween(150)
     )
@@ -294,16 +295,16 @@ fun MovingTextCopy(originalText: String, isActive: Boolean) {
     Text(
         text = originalText,
         fontSize = 20.sp,
-        color = Color.Gray.copy(alpha = alpha),
+        color = MaterialTheme.colorScheme.primary.copy(alpha = alpha),
         modifier = Modifier.offset(y = offset),
         textAlign = TextAlign.Center
     )
 }
 
-fun splitLyricIntoLines(lyric: String, maxCharsPerLine: Int = 25): String {
-    if (lyric.length <= maxCharsPerLine) return lyric
+fun splitLyricIntoLines(lyrics: String, maxCharsPerLine: Int = 25): String {
+    if (lyrics.length <= maxCharsPerLine) return lyrics
 
-    val words = lyric.split(" ")
+    val words = lyrics.split(" ")
     val lines = mutableListOf<String>()
     var currentLine = ""
 
@@ -338,10 +339,13 @@ fun LyricsScreenPreview(){
         """.trimIndent()
     )
 
-    LyricsScreen(
-        rememberNavController(),
-        previewMusic,
-        null,
-        isPreview = true
-    )
+    LyryxTheme(dynamicColor = false){
+        LyricsScreen(
+            rememberNavController(),
+            previewMusic,
+            null,
+            isPreview = true
+        )
+    }
+
 }

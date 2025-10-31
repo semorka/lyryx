@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Lyryx</string>
+    <string name="choose_audio">choose audio</string>
 </resources>

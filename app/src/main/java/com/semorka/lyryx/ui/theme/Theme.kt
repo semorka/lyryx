@@ -9,17 +9,26 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import com.semorka.lyryx.R
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
+    primary = darkPrimaryColor,
     secondary = PurpleGrey80,
+    onBackground = Color.White,
+    background = Color(0xFF131318),
     tertiary = Pink80
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
+    primary = lightPrimaryColor,
     secondary = PurpleGrey40,
+    onBackground = Color.Black,
+    background = Color(0xFFfcf8ff),
     tertiary = Pink40
 
     /* Other default colors to override
@@ -31,6 +40,14 @@ private val LightColorScheme = lightColorScheme(
     onBackground = Color(0xFF1C1B1F),
     onSurface = Color(0xFF1C1B1F),
     */
+)
+
+val ultraFontFamily = FontFamily(
+    Font(R.font.ultra_regular, FontWeight.Normal)
+)
+
+val dmserifFontFamily = FontFamily(
+    Font(R.font.dmserif_text_regular, weight = FontWeight.Normal)
 )
 
 @Composable

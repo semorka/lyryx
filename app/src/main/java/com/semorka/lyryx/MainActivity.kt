@@ -4,9 +4,12 @@ import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -24,6 +27,7 @@ import com.semorka.lyryx.music.MusicViewModel
 import com.semorka.lyryx.screens.LoadTrackScreen
 import com.semorka.lyryx.screens.LyricsScreen
 import com.semorka.lyryx.screens.SearchScreen
+import com.semorka.lyryx.ui.theme.LyryxTheme
 
 class LyricsViewModelFactory(val application: Application):
     ViewModelProvider.Factory {
@@ -34,19 +38,22 @@ class LyricsViewModelFactory(val application: Application):
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
-            val owner = LocalViewModelStoreOwner.current
+            LyryxTheme {
+                val owner = LocalViewModelStoreOwner.current
 
-            owner?.let{
-                val lyricsVm: LyricsViewModel = viewModel(
-                    it,
-                    "LyricsViewModel",
-                    LyricsViewModelFactory(LocalContext.current.applicationContext as Application)
-                )
+                owner?.let{
+                    val lyricsVm: LyricsViewModel = viewModel(
+                        it,
+                        "LyricsViewModel",
+                        LyricsViewModelFactory(LocalContext.current.applicationContext as Application)
+                    )
 
-                Scaffold { paddingValues ->
-                    Box(Modifier.padding(paddingValues)) {
-                        Main(lyricsVm)
+                    Scaffold { paddingValues ->
+                        Surface(Modifier.padding(paddingValues), color = MaterialTheme.colorScheme.background) {
+                            Main(lyricsVm)
+                        }
                     }
                 }
             }
@@ -78,8 +85,8 @@ fun Main(lyricsVm: BaseLyricsViewModel){
             )
 
             LaunchedEffect(Unit) {
-                lyricsVm
                 lyricsVm.songName = songName
+                lyricsVm.artistName = artistName
                 lyricsVm.syncedText = lyrics
                 lyricsVm.addLyrics()
             }
