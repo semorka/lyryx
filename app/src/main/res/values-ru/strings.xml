@@ -2,4 +2,14 @@
 <resources>
     <string name="app_name">Lyryx</string>
     <string name="choose_audio">выбрать аудио</string>
+    <string name="name">Название</string>
+    <string name="artist">Исполнитель</string>
+    <string name="search">Найти</string>
+
+    <plurals name="songs_found">
+        <item quantity="one">Найдена %d песня</item>
+        <item quantity="few">Найдено %d песни</item>
+        <item quantity="many">Найдено %d песен</item>
+        <item quantity="other">Найдено %d песен</item>
+    </plurals>
 </resources>

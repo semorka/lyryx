@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">Lyryx</string>
     <string name="choose_audio">choose audio</string>
+    <string name="name">Name</string>
+    <string name="artist">Artist</string>
+    <string name="search">Search</string>
+
+    <plurals name="songs_found">
+        <item quantity="one">Found 1 song</item>
+        <item quantity="other">Found 1 songs</item>
+    </plurals>
 </resources>

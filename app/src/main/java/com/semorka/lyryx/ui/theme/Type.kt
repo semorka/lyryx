@@ -10,12 +10,12 @@ import androidx.compose.ui.unit.sp
 val Typography = Typography(
     labelSmall = TextStyle(
         fontFamily = FontFamily.Default,
-        fontSize = 18.sp
+        fontSize = 14.sp
     ),
 
     labelMedium = TextStyle(
         fontFamily = dmserifFontFamily,
-        fontSize = 22.sp
+        fontSize = 25.sp
     ),
 
     labelLarge = TextStyle(

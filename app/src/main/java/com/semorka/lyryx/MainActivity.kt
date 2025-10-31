@@ -2,10 +2,10 @@ package com.semorka.lyryx
 
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -22,17 +22,40 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.semorka.lyryx.data.BaseLyricsViewModel
 import com.semorka.lyryx.data.LyricsViewModel
+import com.semorka.lyryx.genius.GeniusRepository
 import com.semorka.lyryx.music.Music
 import com.semorka.lyryx.music.MusicViewModel
 import com.semorka.lyryx.screens.LoadTrackScreen
 import com.semorka.lyryx.screens.LyricsScreen
 import com.semorka.lyryx.screens.SearchScreen
 import com.semorka.lyryx.ui.theme.LyryxTheme
+import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.functions.Functions
+import io.github.jan.supabase.functions.functions
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.postgrest.from
+import io.ktor.client.statement.bodyAsText
+import kotlinx.serialization.Serializable
 
-class LyricsViewModelFactory(val application: Application):
-    ViewModelProvider.Factory {
+val supabase = createSupabaseClient(
+    supabaseUrl = "https://wicmfrsnwoeoomtapwog.supabase.co",
+    supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpY21mcnNud29lb29tdGFwd29nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxMTc5MzIsImV4cCI6MjA3NzY5MzkzMn0.X-U0EytanHHJD-PoFnEIWL7S2dGe3OcYAzV2HTPqvEg"
+) {
+    install(Auth)
+    install(Postgrest)
+    install(Functions)
+}
+
+class LyricsViewModelFactory(
+    private val application: Application
+): ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return LyricsViewModel(application) as T
+        if (modelClass.isAssignableFrom(LyricsViewModel::class.java)) {
+            return LyricsViewModel(application) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     } }
 
 class MainActivity : ComponentActivity() {
@@ -55,6 +78,8 @@ class MainActivity : ComponentActivity() {
                             Main(lyricsVm)
                         }
                     }
+                } ?: run {
+                    throw IllegalArgumentException("Owner is null")
                 }
             }
         }
@@ -65,6 +90,11 @@ class MainActivity : ComponentActivity() {
 fun Main(lyricsVm: BaseLyricsViewModel){
     val navcontroller = rememberNavController()
     val viewModel: MusicViewModel = viewModel()
+
+    LaunchedEffect(Unit) {
+        val response = supabase.functions.invoke("genius-proxy").bodyAsText()
+        Log.d("SUPABASE", "Genius key: $response")
+    }
 
     NavHost(navcontroller, startDestination = "LoadTrack") {
         composable("LoadTrack") {
@@ -84,14 +114,21 @@ fun Main(lyricsVm: BaseLyricsViewModel){
                 syncedLyrics = lyrics
             )
 
-            LaunchedEffect(Unit) {
-                lyricsVm.songName = songName
-                lyricsVm.artistName = artistName
-                lyricsVm.syncedText = lyrics
-                lyricsVm.addLyrics()
+            LaunchedEffect(artistName, songName, lyrics) {
+                if (artistName.isNotEmpty() && songName.isNotEmpty()) {
+                    lyricsVm.songName = songName
+                    lyricsVm.artistName = artistName
+                    lyricsVm.syncedText = lyrics
+                    lyricsVm.addLyrics()
+                }
             }
 
             LyricsScreen(navcontroller, music, viewModel.currentAudioUri)
         }
     }
 }
+@Serializable
+data class SecretString(
+    val id: Int,
+    val string: String
+)

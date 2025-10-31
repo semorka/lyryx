@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.devtoolsKsp)
+    kotlin("plugin.serialization") version "2.2.21"
 }
 
 android {
@@ -54,6 +55,18 @@ dependencies {
 
     implementation("be.tarsos.dsp:core:2.5")
     implementation("be.tarsos.dsp:jvm:2.5")
+
+    implementation("io.coil-kt:coil-compose:2.7.0")
+
+    implementation("net.jthink:jaudiotagger:3.0.1")
+
+    implementation(platform("io.github.jan-tennert.supabase:bom:3.2.6"))
+    implementation("io.github.jan-tennert.supabase:functions-kt:3.2.6")
+    implementation("io.github.jan-tennert.supabase:postgrest-kt")
+    implementation("io.github.jan-tennert.supabase:auth-kt")
+    implementation("io.github.jan-tennert.supabase:realtime-kt")
+
+    implementation("io.ktor:ktor-client-android:3.3.1")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

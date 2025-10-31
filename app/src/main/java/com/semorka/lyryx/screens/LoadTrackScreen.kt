@@ -72,24 +72,24 @@ fun LoadTrackScreen(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun LoadTrackScreenPreviewLightTheme(){
-    LyryxTheme(dynamicColor = false, darkTheme = false){
-        val viewModel = MockMusicViewModel.createMusicViewModel()
-        Surface(Modifier.systemBarsPadding(), color = MaterialTheme.colorScheme.background){
-            LoadTrackScreen(rememberNavController(), viewModel)
-        }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun LoadTrackScreenPreviewDarkTheme(){
-    LyryxTheme(dynamicColor = false, darkTheme = true){
-        val viewModel = MockMusicViewModel.createMusicViewModel()
-        Surface(Modifier.systemBarsPadding(), color = MaterialTheme.colorScheme.background){
-            LoadTrackScreen(rememberNavController(), viewModel)
-        }
-    }
-}
+//@Preview(showBackground = true, showSystemUi = true)
+//@Composable
+//fun LoadTrackScreenPreviewLightTheme(){
+//    LyryxTheme(dynamicColor = false, darkTheme = false){
+//        val viewModel = MockMusicViewModel.createMusicViewModel()
+//        Surface(Modifier.systemBarsPadding(), color = MaterialTheme.colorScheme.background){
+//            LoadTrackScreen(rememberNavController(), viewModel)
+//        }
+//    }
+//}
+//
+//@Preview(showBackground = true, showSystemUi = true)
+//@Composable
+//fun LoadTrackScreenPreviewDarkTheme(){
+//    LyryxTheme(dynamicColor = false, darkTheme = true){
+//        val viewModel = MockMusicViewModel.createMusicViewModel()
+//        Surface(Modifier.systemBarsPadding(), color = MaterialTheme.colorScheme.background){
+//            LoadTrackScreen(rememberNavController(), viewModel)
+//        }
+//    }
+//}
