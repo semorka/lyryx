@@ -5,6 +5,7 @@
     <string name="name">Название</string>
     <string name="artist">Исполнитель</string>
     <string name="search">Найти</string>
+    <string name="song_founded_library">Найдено в библиотеке. Загружаем</string>
 
     <plurals name="songs_found">
         <item quantity="one">Найдена %d песня</item>
@@ -12,4 +13,8 @@
         <item quantity="many">Найдено %d песен</item>
         <item quantity="other">Найдено %d песен</item>
     </plurals>
+    <string name="song_loading_text">Загружаем текст песни</string>
+    <string name="song_searching">Ищем песни</string>
+    <string name="search_nothing">Ничего не найдено</string>
+    <string name="file_name">Название файла</string>
 </resources>

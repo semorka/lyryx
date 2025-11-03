@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,14 +34,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.semorka.lyryx.data.BaseLyricsViewModel
@@ -51,8 +46,11 @@ import com.semorka.lyryx.music.MockMusicViewModel
 import com.semorka.lyryx.music.MusicViewModel
 import com.semorka.lyryx.ui.theme.LyryxTheme
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import coil.compose.AsyncImage
+import com.semorka.lyryx.R
 import com.semorka.lyryx.data.LyricsEntity
 import com.semorka.lyryx.genius.GeniusRepository
 import com.semorka.lyryx.musicApi
@@ -85,7 +83,7 @@ fun SearchScreen(navController: NavController = rememberNavController(), musicVm
     Column(Modifier.padding(16.dp).fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)){
             if (musicVm.currentAudioUri != null) {
-                Text("Название файла: $fileName")
+                Text("${stringResource(R.string.file_name)}: $fileName")
                 Spacer(Modifier.height(8.dp))
             }
 
@@ -93,34 +91,34 @@ fun SearchScreen(navController: NavController = rememberNavController(), musicVm
                 value = songNameSearch,
                 onValueChange = { songNameSearch = it },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Название") }
+                label = { Text(stringResource(R.string.name)) }
             )
             OutlinedTextField(
                 value = artistNameSearch,
                 onValueChange = { artistNameSearch = it },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Исполнитель") }
+                label = { Text(stringResource(R.string.artist)) }
             )
 
             Button(
                 onClick = {
                     if("$songNameSearch$artistNameSearch".isNotEmpty()){
                         scope.launch {
-                            musicVm.searchText = "Ищем песни..."
+                            musicVm.searchText = context.getString(R.string.song_searching).withEllipsis()
                             musicVm.songs = GeniusRep.searchSongs(query = "$songNameSearch $artistNameSearch")
-                            if(musicVm.songs.isNotEmpty()) musicVm.searchText = "Найдено ${musicVm.songs.size} песен"
-                            else musicVm.searchText = "Ничего не найдено"
+                            if(musicVm.songs.isNotEmpty()) musicVm.searchText = resources.getQuantityString(R.plurals.songs_found, musicVm.songs.size)
+                            else musicVm.searchText = context.getString(R.string.search_nothing)
                         }
                     }
                     else {
-                        musicVm.searchText = "Напишите данные"
+                        musicVm.searchText = resources.getStringArray(R.array.enter_song).random()
                     }
                 },
                 shape = RoundedCornerShape(25),
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
             ) {
-                Text("Найти", style = MaterialTheme.typography.labelMedium)
+                Text(stringResource(R.string.search), style = MaterialTheme.typography.labelMedium)
             }
         }
 
@@ -134,7 +132,7 @@ fun SearchScreen(navController: NavController = rememberNavController(), musicVm
                         scope.launch {
                             lyricVm.searchLyrics(song.primary_artist.name, song.title)
                             if(lyricVm.searchResult != emptyList<LyricsEntity>()){
-                                musicVm.searchText = "Найдено в библиотеке. Загружаем..."
+                                musicVm.searchText = context.getString(R.string.song_founded_library).withEllipsis()
                                 val result = lyricVm.searchResult[0]
                                 val artistName = result.artistName
                                 val songName = result.songName
@@ -142,7 +140,7 @@ fun SearchScreen(navController: NavController = rememberNavController(), musicVm
                                 navController.navigate("Lyrics/${artistName}/${songName}/${syncedText}")
                             }
                             else {
-                                musicVm.searchText = "Загружаем текст песниюю"
+                                musicVm.searchText = context.getString(R.string.song_loading_text).withEllipsis()
                                 val result = musicApi.searchMusic("$artistNameSearch $songNameSearch").first()
                                 val artistName = result.artistName
                                 val songName = result.name
@@ -186,7 +184,7 @@ private fun getFileFromUri(context: Context, uri: Uri): File? {
         else if (uri.scheme == "content") {
             val inputStream = context.contentResolver.openInputStream(uri)
             val fileName = getFileName(context, uri)
-            val file = File(context.cacheDir, fileName ?: "temp_audio")
+            val file = File(context.cacheDir, fileName)
 
             inputStream?.use { input ->
                 file.outputStream().use { output ->
@@ -234,6 +232,8 @@ private fun parseMusicFilename(filename: String): ParsedTrack {
 }
 
 private data class ParsedTrack(val artist: String, val title: String)
+
+fun String.withEllipsis(): String = "$this..."
 
 @Composable
 fun PreviewAsyncImage(

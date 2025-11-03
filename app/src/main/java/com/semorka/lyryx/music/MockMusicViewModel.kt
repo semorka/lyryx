@@ -3,7 +3,7 @@ package com.semorka.lyryx.music
 import com.semorka.lyryx.genius.models.GeniusArtist
 import com.semorka.lyryx.genius.models.GeniusSong
 
-object MockMusicViewModel {
+object MockMusicViewModel: MusicViewModel() {
     fun createMusicViewModel(): MusicViewModel {
         return MusicViewModel().apply {
             searchText = "Найдено 3 песни"

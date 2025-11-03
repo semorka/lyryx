@@ -4,9 +4,22 @@
     <string name="name">Name</string>
     <string name="artist">Artist</string>
     <string name="search">Search</string>
+    <string name="song_founded_library">Founded in library. Loading</string>
+
+    <string-array name="enter_song">
+        <item>Enter song name</item>
+        <item>Song name?</item>
+        <item>Do you remember the name?</item>
+        <item>What\'s the song called?</item>
+        <item>What did the artist call this song?</item>
+    </string-array>
 
     <plurals name="songs_found">
         <item quantity="one">Found 1 song</item>
         <item quantity="other">Found 1 songs</item>
     </plurals>
+    <string name="song_loading_text">Loading text of song</string>
+    <string name="song_searching">Searching songs</string>
+    <string name="search_nothing">Nothing found</string>
+    <string name="file_name">File name</string>
 </resources>

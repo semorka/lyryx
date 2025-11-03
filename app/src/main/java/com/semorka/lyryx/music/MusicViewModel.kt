@@ -15,26 +15,4 @@ open class MusicViewModel : ViewModel() {
     var searchText by mutableStateOf("Найти музыку")
     var songs by mutableStateOf<List<GeniusSong>>(emptyList())
     var currentAudioUri by mutableStateOf<Uri?>(null)
-
-//    fun searchSongs(songName: String, artistName: String, resources: Resources) {
-//        viewModelScope.launch {
-//            searchText = "Ищем тексты..."
-//
-//            try {
-//                val result = musicApi.searchMusic("$artistName $songName")
-//                if (result.isNotEmpty()) {
-//                    songs = result
-//                    searchText= resources.getQuantityString(
-//                        R.plurals.songs_found,
-//                        result.size,
-//                        result.size
-//                    )
-//                } else {
-//                    searchText = "Ничего не найдено"
-//                }
-//            } catch (e: Exception) {
-//                searchText = "Ошибка: ${e.message}"
-//            }
-//        }
-//    }
 }

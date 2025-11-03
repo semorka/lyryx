@@ -1,5 +1,6 @@
 package com.semorka.lyryx.screens
 
+import android.R
 import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
@@ -9,6 +10,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -161,10 +163,8 @@ fun LyricsScreen(navController: NavController, music: Music, audioUri: Uri?, isP
                             isPlaying = true
 
                             beatDetector?.start(this) { beatTime ->
-                                // Просто обновляем lastOnsetTime - currentTime уже обновляется в другом месте
                                 lastOnsetTime = beatTime
                                 onsetTimestamps.add(beatTime)
-                                Log.d("BEAT_UI", "Бит принят в UI: $beatTime")
                             }
                         }
                         setOnCompletionListener {
@@ -173,7 +173,7 @@ fun LyricsScreen(navController: NavController, music: Music, audioUri: Uri?, isP
                     }
                     mediaPlayer = player
                 } catch (e: Exception) {
-                    Log.e("LYRYX", "Ошибка: ${e.message}")
+                    Log.e("LYRYX", "Error: ${e.message}")
                 }
             }
         }
@@ -226,12 +226,26 @@ fun LyricsScreen(navController: NavController, music: Music, audioUri: Uri?, isP
     }
 
     Box(Modifier.fillMaxSize().padding(16.dp)) {
-        Row(Modifier.fillMaxWidth()) {
-            Column(Modifier.weight(1f)) {
-                Text(music.name, fontSize = 20.sp)
-                Text(music.artistName, fontSize = 16.sp, color = Color.Gray)
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(Modifier.weight(3f)) {
+                Text(music.name, fontSize = 20.sp, style = MaterialTheme.typography.labelMedium)
+                Text(music.artistName, fontSize = 16.sp, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
             }
-            Text(formattedTime)
+            Text(
+                text = "Lyryx",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(3f),
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                formattedTime,
+                textAlign = TextAlign.End,
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.weight(2f)
+            )
         }
 
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
