@@ -22,19 +22,18 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.semorka.lyryx.data.BaseLyricsViewModel
 import com.semorka.lyryx.data.LyricsViewModel
-import com.semorka.lyryx.genius.GeniusRepository
 import com.semorka.lyryx.music.Music
 import com.semorka.lyryx.music.MusicViewModel
 import com.semorka.lyryx.screens.LoadTrackScreen
-import com.semorka.lyryx.screens.LyricsScreen
+import com.semorka.lyryx.screens.lyrics.LyricsScreen
 import com.semorka.lyryx.screens.SearchScreen
+import com.semorka.lyryx.screens.lyrics.ExampleScreen
 import com.semorka.lyryx.ui.theme.LyryxTheme
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.functions.Functions
 import io.github.jan.supabase.functions.functions
 import io.github.jan.supabase.postgrest.Postgrest
-import io.github.jan.supabase.postgrest.from
 import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.Serializable
 
@@ -46,6 +45,8 @@ val supabase = createSupabaseClient(
     install(Postgrest)
     install(Functions)
 }
+
+val playerVm = PlayerViewModel()
 
 class LyricsViewModelFactory(
     private val application: Application
@@ -75,7 +76,7 @@ class MainActivity : ComponentActivity() {
 
                     Scaffold { paddingValues ->
                         Surface(Modifier.padding(paddingValues), color = MaterialTheme.colorScheme.background) {
-                            Main(lyricsVm)
+                            Main(lyricsVm, playerVm)
                         }
                     }
                 } ?: run {
@@ -87,9 +88,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Main(lyricsVm: BaseLyricsViewModel){
+fun Main(lyricsVm: BaseLyricsViewModel, playerVm: PlayerViewModel){
     val navcontroller = rememberNavController()
-    val viewModel: MusicViewModel = viewModel()
+    val musicVm: MusicViewModel = viewModel()
 
     LaunchedEffect(Unit) {
         val response = supabase.functions.invoke("genius-proxy").bodyAsText()
@@ -98,10 +99,10 @@ fun Main(lyricsVm: BaseLyricsViewModel){
 
     NavHost(navcontroller, startDestination = "LoadTrack") {
         composable("LoadTrack") {
-            LoadTrackScreen(navcontroller, viewModel)
+            LoadTrackScreen(navcontroller, musicVm)
         }
         composable("Search") {
-            SearchScreen(navcontroller, viewModel, lyricsVm)
+            SearchScreen(navcontroller, musicVm, lyricsVm)
         }
         composable("Lyrics/{artistName}/{songName}/{lyrics}") { backStackEntry ->
             val artistName = backStackEntry.arguments?.getString("artistName") ?: ""
@@ -123,12 +124,7 @@ fun Main(lyricsVm: BaseLyricsViewModel){
                 }
             }
 
-            LyricsScreen(navcontroller, music, viewModel.currentAudioUri)
+            LyricsScreen(navcontroller, music, musicVm.currentAudioUri, playerVm)
         }
     }
 }
-@Serializable
-data class SecretString(
-    val id: Int,
-    val string: String
-)

@@ -1,15 +1,17 @@
-package com.semorka.lyryx.screens
+package com.semorka.lyryx.screens.lyrics
 
-import android.R
-import android.media.MediaPlayer
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,8 +20,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,23 +42,32 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberPermissionState
 import com.semorka.lyryx.BeatDetector
+import com.semorka.lyryx.MockPlayerViewModel
+import com.semorka.lyryx.PlayerViewModel
 import com.semorka.lyryx.music.Music
 import com.semorka.lyryx.ui.theme.LyryxTheme
 import kotlinx.coroutines.delay
-import kotlin.text.ifEmpty
 
 @Composable
-fun LyricsScreen(navController: NavController, music: Music, audioUri: Uri?, isPreview: Boolean = false) {
+fun LyricsScreenRealContent(
+    navController: NavController,
+    music: Music,
+    audioUri: Uri?,
+    playerVm: PlayerViewModel
+) {
     val context = LocalContext.current
-    var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
-    var currentTime by remember { mutableStateOf(0L) }
-    var isPlaying by remember { mutableStateOf(false) }
 
-    val beatDetector = if (!isPreview) remember { BeatDetector() } else null
+    val currentTime = playerVm.currentTime
+    val isPlaying = playerVm.isPlaying
 
+    val beatDetector = remember { BeatDetector() }
     val onsetTimestamps = remember { mutableStateListOf<Long>() }
     var lastOnsetTime by remember { mutableStateOf(0L) }
 
@@ -69,10 +80,6 @@ fun LyricsScreen(navController: NavController, music: Music, audioUri: Uri?, isP
                     val timeMs = min.toLong() * 60_000 + sec.toLong() * 1_000 + centi.toLong() * 10
                     val cleanText = line.replace(Regex("\\[\\d+:\\d+\\.\\d+\\]\\s*"), "").trim()
                     timeMs to cleanText
-                    // TODO Сделать обработку ухода строки
-//                    if (cleanText.isNotEmpty()) {
-//                        timeMs to cleanText
-//                    } else null
                 } else null
             }.sortedBy { it.first }
         } ?: emptyList()
@@ -111,83 +118,57 @@ fun LyricsScreen(navController: NavController, music: Music, audioUri: Uri?, isP
 
     var lineChanged by remember { mutableStateOf(false) }
 
-    if (isPreview) {
-        LaunchedEffect(Unit) {
-            while (true) {
-                delay(100)
-                currentTime += 100
-
-                if (currentTime % 800 == 0L) {
-                    lastOnsetTime = currentTime
-                    onsetTimestamps.add(currentTime)
-                }
-                if (currentTime % 1000 == 0L) {
-                    lineChanged = true
-                    delay(500)
-                    lineChanged = false
-                }
-
-                if (currentTime >= 3000){
-                    currentTime = 0
-                }
-            }
+    LaunchedEffect(currentLyric) {
+        if (currentLyric.isNotEmpty() && currentLyric != "♪") {
+            lineChanged = true
+            delay(500)
+            lineChanged = false
         }
-    } else {
-        LaunchedEffect(currentLyric) {
-            if (currentLyric.isNotEmpty() && currentLyric != "♪") {
-                lineChanged = true
-                delay(500)
-                lineChanged = false
-            }
-        }
+    }
 
-        LaunchedEffect(isPlaying) {
-            if (isPlaying) {
-                while (isPlaying) {
-                    delay(50)
-                    mediaPlayer?.let { player ->
-                        currentTime = player.currentPosition.toLong()
-                    }
+    LaunchedEffect(audioUri) {
+        if (audioUri != null) {
+            playerVm.initializePlayer(context, audioUri) {
+                beatDetector.start(playerVm.mediaPlayer!!) { beatTime ->
+                    lastOnsetTime = beatTime
+                    onsetTimestamps.add(beatTime)
                 }
-            }
-        }
-
-        LaunchedEffect(audioUri) {
-            if (audioUri != null && mediaPlayer == null) {
-                try {
-                    val player = MediaPlayer().apply {
-                        setDataSource(context, audioUri)
-                        prepare()
-                        setOnPreparedListener {
-                            start()
-                            isPlaying = true
-
-                            beatDetector?.start(this) { beatTime ->
-                                lastOnsetTime = beatTime
-                                onsetTimestamps.add(beatTime)
-                            }
-                        }
-                        setOnCompletionListener {
-                            isPlaying = false
-                        }
-                    }
-                    mediaPlayer = player
-                } catch (e: Exception) {
-                    Log.e("LYRYX", "Error: ${e.message}")
-                }
-            }
-        }
-
-        DisposableEffect(Unit) {
-            onDispose {
-                isPlaying = false
-                beatDetector?.stop()
-                mediaPlayer?.release()
-                mediaPlayer = null
             }
         }
     }
 
+    DisposableEffect(Unit) {
+        onDispose {
+            beatDetector.stop()
+        }
+    }
+
+    LyricsScreenUI(
+        music = music,
+        currentLyric = currentLyric,
+        isPlaying = isPlaying,
+        formattedTime = String.format("%02d:%02d", currentTime / 60_000, (currentTime % 60_000) / 1_000),
+        isOnsetActive = isOnsetActive,
+        lineChanged = lineChanged,
+        showMovingText = showMovingText,
+        movingText = movingText,
+        onPlayPause = { playerVm.playPause() }
+    )
+}
+
+@Composable
+fun LyricsScreenUI(
+    music: Music,
+    currentLyric: String,
+    isPlaying: Boolean,
+    formattedTime: String,
+    isOnsetActive: Boolean,
+    lineChanged: Boolean,
+    showMovingText: Boolean,
+    movingText: String,
+    onPlayPause: () -> Unit,
+    showPreviewInfo: Boolean = false
+) {
     val animatedTextSize by animateFloatAsState(
         targetValue = when {
             isOnsetActive -> if (currentLyric.length > 25) 23f else 29f
@@ -216,15 +197,9 @@ fun LyricsScreen(navController: NavController, music: Music, audioUri: Uri?, isP
     )
 
     val animatedBoxColor by animateColorAsState(
-        targetValue = if(lineChanged) Color.Black.copy(0.03f)
-        else Color.Transparent,
+        targetValue = if(lineChanged) Color.Black.copy(0.03f) else Color.Transparent,
         animationSpec = tween(400)
     )
-
-    val formattedTime = remember(currentTime) {
-        String.format("%02d:%02d", currentTime / 60_000, (currentTime % 60_000) / 1_000)
-    }
-
     Box(Modifier.fillMaxSize().padding(16.dp)) {
         Row(
             Modifier.fillMaxWidth(),
@@ -266,10 +241,10 @@ fun LyricsScreen(navController: NavController, music: Music, audioUri: Uri?, isP
                             modifier = Modifier.fillMaxWidth()
                         )
 
-                        if (isPreview) {
+                        if (showPreviewInfo) {
                             Spacer(Modifier.height(16.dp))
                             Text(
-                                text = "Превью | Бит: $isOnsetActive | Смена: $lineChanged",
+                                text = "Preivew mode",
                                 fontSize = 12.sp,
                                 color = Color.Gray
                             )
@@ -281,85 +256,77 @@ fun LyricsScreen(navController: NavController, music: Music, audioUri: Uri?, isP
                 MovingTextCopy(movingText, true)
             }
         }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(32.dp)
+        ) {
+            Text(
+                text = if (isPlaying) "⏸" else "▶",
+                modifier = Modifier
+                    .clickable { onPlayPause() },
+                fontSize = 36.sp
+            )
+        }
     }
 }
 
 @Composable
-fun MovingTextCopy(originalText: String, isActive: Boolean) {
-    var animate by remember { mutableStateOf(false) }
-
-    val offset by animateDpAsState(
-        targetValue = if (animate) 300f.dp else 0f.dp,
-        animationSpec = tween(1500)
-    )
-
-    val alpha by animateFloatAsState(
-        targetValue = if (animate) 0f else 0.5f,
-        animationSpec = tween(1200)
-    )
-
-    LaunchedEffect(isActive) {
-        if (isActive) {
-            animate = true
-            delay(1500)
-            animate = false
-        }
-    }
-
-    Text(
-        text = originalText,
-        fontSize = 20.sp,
-        color = MaterialTheme.colorScheme.primary.copy(alpha = alpha),
-        modifier = Modifier.offset(y = offset),
-        textAlign = TextAlign.Center
-    )
-}
-
-fun splitLyricIntoLines(lyrics: String, maxCharsPerLine: Int = 25): String {
-    if (lyrics.length <= maxCharsPerLine) return lyrics
-
-    val words = lyrics.split(" ")
-    val lines = mutableListOf<String>()
-    var currentLine = ""
-
-    for (word in words) {
-        if ("$currentLine $word".trim().length <= maxCharsPerLine) {
-            currentLine = "$currentLine $word".trim()
+fun ExampleScreen() {
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // Permission Accepted: Do something
+            Log.d("LYRYX","PERMISSION GRANTED")
         } else {
-            if (currentLine.isNotEmpty()) {
-                lines.add(currentLine)
-            }
-            currentLine = word
+            Log.d("LYRYX","PERMISSION DENIED")
         }
     }
-
-    if (currentLine.isNotEmpty()) {
-        lines.add(currentLine)
+    val context = LocalContext.current
+    Button(
+        onClick = {
+            // Check permission
+            when (PackageManager.PERMISSION_GRANTED) {
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.RECORD_AUDIO
+                ) -> {
+                    // Some works that require permission
+                    Log.d("ExampleScreen","Code requires permission")
+                }
+                else -> {
+                    launcher.launch(Manifest.permission.RECORD_AUDIO)
+                }
+            }
+        }
+    ) {
+        Text(text = "Check and Request Permission")
     }
-
-    return lines.joinToString("\n")
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun LyricsScreenPreview(){
+fun LyricsScreenUI_Preview() {
     val previewMusic = Music(
-        "ArtistName",
-        "SongName",
-        """
-        [00:00.00] Первая строка текста
-        [00:01.00] Вторая строка текста  
-        [00:02.00] Третья строка текста
-        """.trimIndent()
+        "Snow Strippers",
+        "Under Your Spell",
+        "[00:00.00] Sample lyrics for preview"
     )
 
-    LyryxTheme(dynamicColor = false){
-        LyricsScreen(
-            rememberNavController(),
-            previewMusic,
-            null,
-            isPreview = true
+    LyryxTheme {
+        LyricsScreenUI(
+            music = previewMusic,
+            currentLyric = "This is a sample lyric line that shows how text looks",
+            isPlaying = true,
+            formattedTime = "02:30",
+            isOnsetActive = true,
+            lineChanged = false,
+            showMovingText = false,
+            movingText = "",
+            onPlayPause = { },
+            showPreviewInfo = false
         )
     }
-
 }

@@ -1,8 +1,13 @@
 package com.semorka.lyryx.screens
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +24,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -49,10 +55,13 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.semorka.lyryx.R
 import com.semorka.lyryx.data.LyricsEntity
 import com.semorka.lyryx.genius.GeniusRepository
+import com.semorka.lyryx.genius.models.GeniusSong
 import com.semorka.lyryx.musicApi
 import kotlinx.coroutines.launch
 import org.jaudiotagger.audio.AudioFileIO
@@ -70,6 +79,9 @@ fun SearchScreen(navController: NavController = rememberNavController(), musicVm
     val GeniusRep = GeniusRepository()
 
     val fileName = musicVm.currentAudioUri?.let { getFileName(LocalContext.current, it) } ?: "Unknown"
+
+    var showPermissionDialog by remember { mutableStateOf(false) }
+    var selectedSong by remember { mutableStateOf<GeniusSong?>(null) }
 
     LaunchedEffect(musicVm.currentAudioUri) {
         musicVm.currentAudioUri?.let { uri ->
@@ -129,25 +141,8 @@ fun SearchScreen(navController: NavController = rememberNavController(), musicVm
                 Row(Modifier.fillMaxWidth().clickable(
                     enabled = true,
                     onClick = {
-                        scope.launch {
-                            lyricVm.searchLyrics(song.primary_artist.name, song.title)
-                            if(lyricVm.searchResult != emptyList<LyricsEntity>()){
-                                musicVm.searchText = context.getString(R.string.song_founded_library).withEllipsis()
-                                val result = lyricVm.searchResult[0]
-                                val artistName = result.artistName
-                                val songName = result.songName
-                                val syncedText = result.syncedText
-                                navController.navigate("Lyrics/${artistName}/${songName}/${syncedText}")
-                            }
-                            else {
-                                musicVm.searchText = context.getString(R.string.song_loading_text).withEllipsis()
-                                val result = musicApi.searchMusic("$artistNameSearch $songNameSearch").first()
-                                val artistName = result.artistName
-                                val songName = result.name
-                                val syncedText = result.syncedLyrics
-                                navController.navigate("Lyrics/${artistName}/${songName}/${syncedText}")
-                            }
-                        }
+                        selectedSong = song
+                        showPermissionDialog = true
                     }
                 )){
                     PreviewAsyncImage(
@@ -162,6 +157,100 @@ fun SearchScreen(navController: NavController = rememberNavController(), musicVm
                 }
             }
         }
+
+        if (showPermissionDialog) {
+            PermissionDialog( {
+                showPermissionDialog = false
+                selectedSong?.let { song ->
+                    scope.launch {
+                        lyricVm.searchLyrics(song.primary_artist.name, song.title)
+                        if(lyricVm.searchResult.isNotEmpty()){
+                            musicVm.searchText = context.getString(R.string.song_founded_library).withEllipsis()
+                            val result = lyricVm.searchResult[0]
+                            navController.navigate("Lyrics/${result.artistName}/${result.songName}/${result.syncedText}")
+                        } else {
+                            musicVm.searchText = context.getString(R.string.song_loading_text).withEllipsis()
+                            val result = musicApi.searchMusic("$artistNameSearch $songNameSearch").first()
+                            navController.navigate("Lyrics/${result.artistName}/${result.name}/${result.syncedLyrics}")
+                        }
+                    }
+                }
+            })
+        }
+    }
+}
+
+@Composable
+private fun PermissionDialog(event: () -> Unit) {
+    val context = LocalContext.current
+
+    val hasPermission = remember {
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    var showDialog by remember { mutableStateOf(!hasPermission) }
+
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        Log.d("LYRYX", if (isGranted) "PERMISSION GRANTED" else "PERMISSION DENIED")
+        event()
+    }
+
+    LaunchedEffect(hasPermission) {
+        if (hasPermission) {
+            event()
+        }
+    }
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showDialog = false
+                launcher.launch(Manifest.permission.RECORD_AUDIO)
+            },
+            title = { Text("Microphone Access Required") },
+            text = {
+                Text(text = "Allow microphone access in the next window to sync lyrics with music beats.", style = MaterialTheme.typography.bodyLarge)
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog = false
+                        launcher.launch(Manifest.permission.RECORD_AUDIO)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewPermDialog(){
+    LyryxTheme {
+        AlertDialog(
+            onDismissRequest = {
+            },
+            title = { Text("Microphone Access Required") },
+            text = {
+                Text(text = "Allow microphone access in the next window to sync lyrics with music beats.", style = MaterialTheme.typography.bodyLarge)
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }
 
