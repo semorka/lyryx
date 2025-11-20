@@ -3,6 +3,8 @@ package com.semorka.lyryx.screens
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
@@ -116,10 +118,38 @@ fun SearchScreen(navController: NavController = rememberNavController(), musicVm
                 onClick = {
                     if("$songNameSearch$artistNameSearch".isNotEmpty()){
                         scope.launch {
+                            if (!isNetworkAvailable(context)) {
+                                musicVm.searchText = "No internet connection"
+                                musicVm.songs = emptyList()
+                                return@launch
+                            }
+
                             musicVm.searchText = context.getString(R.string.song_searching).withEllipsis()
-                            musicVm.songs = GeniusRep.searchSongs(query = "$songNameSearch $artistNameSearch")
-                            if(musicVm.songs.isNotEmpty()) musicVm.searchText = resources.getQuantityString(R.plurals.songs_found, musicVm.songs.size)
-                            else musicVm.searchText = context.getString(R.string.search_nothing)
+                            try {
+                                musicVm.songs = GeniusRep.searchSongs(query = "$songNameSearch $artistNameSearch")
+                                Log.d("LYRYX", "${musicVm.songs}")
+                                if(musicVm.songs.isNotEmpty()) {
+                                    musicVm.searchText = resources.getQuantityString(
+                                        R.plurals.songs_found,
+                                        musicVm.songs.size,
+                                        musicVm.songs.size
+                                    )
+                                } else {
+                                    musicVm.searchText = context.getString(R.string.search_nothing)
+                                }
+                            } catch (e: Exception) {
+                                Log.e("LYRYX", "Search failed: ${e.message}", e)
+                                musicVm.searchText = when {
+                                    e.message?.contains("Unable to resolve host") == true ->
+                                        "No internet connection"
+                                    e.message?.contains("timeout") == true ->
+                                        "Timeout connection"
+                                    e.message?.contains("Network is unreachable") == true ->
+                                        "Network is unreachable"
+                                    else -> "Error of search: ${e.localizedMessage}"
+                                }
+                                musicVm.songs = emptyList()
+                            }
                         }
                     }
                     else {
@@ -151,31 +181,33 @@ fun SearchScreen(navController: NavController = rememberNavController(), musicVm
                         modifier = Modifier.size(100.dp).clip(RoundedCornerShape(20))
                     )
                     Column {
-                        Text(song.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text(song.primary_artist.name, style = MaterialTheme.typography.titleSmall)
+                        Text(song.title, style = MaterialTheme.typography.labelLarge)
+                        Text(song.primary_artist.name, style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }
         }
 
         if (showPermissionDialog) {
-            PermissionDialog( {
+            PermissionDialog {
                 showPermissionDialog = false
                 selectedSong?.let { song ->
                     scope.launch {
                         lyricVm.searchLyrics(song.primary_artist.name, song.title)
-                        if(lyricVm.searchResult.isNotEmpty()){
-                            musicVm.searchText = context.getString(R.string.song_founded_library).withEllipsis()
+                        if (lyricVm.searchResult.isNotEmpty()) {
+                            musicVm.searchText =
+                                context.getString(R.string.song_founded_library).withEllipsis()
                             val result = lyricVm.searchResult[0]
                             navController.navigate("Lyrics/${result.artistName}/${result.songName}/${result.syncedText}")
                         } else {
-                            musicVm.searchText = context.getString(R.string.song_loading_text).withEllipsis()
+                            musicVm.searchText =
+                                context.getString(R.string.song_loading_text).withEllipsis()
                             val result = musicApi.searchMusic("$artistNameSearch $songNameSearch").first()
                             navController.navigate("Lyrics/${result.artistName}/${result.name}/${result.syncedLyrics}")
                         }
                     }
                 }
-            })
+            }
         }
     }
 }
@@ -267,27 +299,31 @@ private fun getFileName(context: Context, uri: Uri): String {
 
 private fun getFileFromUri(context: Context, uri: Uri): File? {
     return try {
-        if (uri.scheme == "file") {
-            File(uri.path!!)
-        }
-        else if (uri.scheme == "content") {
-            val inputStream = context.contentResolver.openInputStream(uri)
-            val fileName = getFileName(context, uri)
-            val file = File(context.cacheDir, fileName)
-
-            inputStream?.use { input ->
-                file.outputStream().use { output ->
-                    input.copyTo(output)
-                }
+        when (uri.scheme) {
+            "file" -> {
+                File(uri.path!!)
             }
-            file
-        } else {
-            null
+            "content" -> {
+                val inputStream = context.contentResolver.openInputStream(uri)
+                val fileName = getFileName(context, uri)
+                val file = File(context.cacheDir, fileName)
+
+                inputStream?.use { input ->
+                    file.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                file
+            }
+            else -> {
+                null
+            }
         }
     } catch (e: Exception) {
         null
     }
 }
+
 private fun getTrackInfo(file: File?): ParsedTrack {
     if (file == null) {
         return ParsedTrack("", "")
@@ -341,6 +377,12 @@ fun PreviewAsyncImage(
     }
 }
 
+private fun isNetworkAvailable(context: Context): Boolean {
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val network = connectivityManager.activeNetwork ?: return false
+    val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+    return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+}
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

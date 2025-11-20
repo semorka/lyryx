@@ -19,7 +19,6 @@ class MockPlayerViewModel : PlayerViewModel() {
     override var isPlaying: Boolean = false
         get() = _isPlaying.value
 
-    // Mock методы
     override fun initializePlayer(context: Context, audioUri: Uri, onPrepared: (() -> Unit)?) {
         if (onPrepared != null) {
             MainScope().launch {

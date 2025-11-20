@@ -15,7 +15,7 @@ val Typography = Typography(
 
     labelMedium = TextStyle(
         fontFamily = dmserifFontFamily,
-        fontSize = 25.sp
+        fontSize = 23.sp
     ),
 
     labelLarge = TextStyle(
@@ -23,10 +23,16 @@ val Typography = Typography(
         fontSize = 28.sp
     ),
 
+    titleMedium = TextStyle(
+        fontFamily = ultraFontFamily,
+        fontSize = 29.sp
+    ),
+
     titleLarge = TextStyle(
         fontFamily = ultraFontFamily,
         fontSize = 32.sp
     )
+
     /* Other default text styles to override
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,

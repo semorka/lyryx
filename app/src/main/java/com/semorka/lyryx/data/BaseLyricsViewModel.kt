@@ -3,8 +3,10 @@ package com.semorka.lyryx.data
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
 
 interface BaseLyricsViewModel {
+    val lyricsList: LiveData<List<LyricsEntity>>
     var artistName: String
     var songName: String
     var syncedText: String

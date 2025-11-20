@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
@@ -24,18 +25,15 @@ import com.semorka.lyryx.data.BaseLyricsViewModel
 import com.semorka.lyryx.data.LyricsViewModel
 import com.semorka.lyryx.music.Music
 import com.semorka.lyryx.music.MusicViewModel
+import com.semorka.lyryx.screens.LibraryScreen
 import com.semorka.lyryx.screens.LoadTrackScreen
 import com.semorka.lyryx.screens.lyrics.LyricsScreen
 import com.semorka.lyryx.screens.SearchScreen
-import com.semorka.lyryx.screens.lyrics.ExampleScreen
 import com.semorka.lyryx.ui.theme.LyryxTheme
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.functions.Functions
-import io.github.jan.supabase.functions.functions
 import io.github.jan.supabase.postgrest.Postgrest
-import io.ktor.client.statement.bodyAsText
-import kotlinx.serialization.Serializable
 
 val supabase = createSupabaseClient(
     supabaseUrl = "https://wicmfrsnwoeoomtapwog.supabase.co",
@@ -89,20 +87,15 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Main(lyricsVm: BaseLyricsViewModel, playerVm: PlayerViewModel){
-    val navcontroller = rememberNavController()
+    val navController = rememberNavController()
     val musicVm: MusicViewModel = viewModel()
 
-    LaunchedEffect(Unit) {
-        val response = supabase.functions.invoke("genius-proxy").bodyAsText()
-        Log.d("SUPABASE", "Genius key: $response")
-    }
-
-    NavHost(navcontroller, startDestination = "LoadTrack") {
+    NavHost(navController, startDestination = "LoadTrack") {
         composable("LoadTrack") {
-            LoadTrackScreen(navcontroller, musicVm)
+            LoadTrackScreen(navController, musicVm)
         }
         composable("Search") {
-            SearchScreen(navcontroller, musicVm, lyricsVm)
+            SearchScreen(navController, musicVm, lyricsVm)
         }
         composable("Lyrics/{artistName}/{songName}/{lyrics}") { backStackEntry ->
             val artistName = backStackEntry.arguments?.getString("artistName") ?: ""
@@ -124,7 +117,11 @@ fun Main(lyricsVm: BaseLyricsViewModel, playerVm: PlayerViewModel){
                 }
             }
 
-            LyricsScreen(navcontroller, music, musicVm.currentAudioUri, playerVm)
+            LyricsScreen(navController, music, musicVm.currentAudioUri, playerVm)
+        }
+        composable("Library") {
+            val lyricsList by lyricsVm.lyricsList.observeAsState(initial = emptyList())
+            LibraryScreen(navController, lyricsList)
         }
     }
 }

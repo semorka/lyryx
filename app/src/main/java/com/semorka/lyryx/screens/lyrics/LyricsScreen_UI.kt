@@ -169,12 +169,15 @@ fun LyricsScreenUI(
     onPlayPause: () -> Unit,
     showPreviewInfo: Boolean = false
 ) {
+    val baseTextSize = calculateBaseTextSize(currentLyric)
+    val scaleMultiplier = getScaleMultiplier(currentLyric)
+
     val animatedTextSize by animateFloatAsState(
         targetValue = when {
-            isOnsetActive -> if (currentLyric.length > 25) 23f else 29f
-            lineChanged -> if (currentLyric.length > 25) 24f else 29f
-            else -> if (currentLyric.length > 25) 20f else 28f
-        },
+            isOnsetActive -> baseTextSize * scaleMultiplier
+            lineChanged -> baseTextSize * (scaleMultiplier * 0.9f)
+            else -> baseTextSize
+        }.coerceAtMost(36f),
         animationSpec = tween(100)
     )
 
@@ -233,8 +236,8 @@ fun LyricsScreenUI(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = splitLyricIntoLines(currentLyric.ifEmpty { "♪" }),
-                            fontSize = animatedTextSize.sp,
+                            text = splitLyricIntoLines(currentLyric.ifEmpty { "♫" }, calculateMaxCharsPerLine(currentLyric)),
+                            fontSize = if (currentLyric.isNotEmpty()) animatedTextSize.sp else 60.sp,
                             color = animatedTextColor,
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight(animatedTextWeight),
@@ -272,40 +275,6 @@ fun LyricsScreenUI(
     }
 }
 
-@Composable
-fun ExampleScreen() {
-    val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            // Permission Accepted: Do something
-            Log.d("LYRYX","PERMISSION GRANTED")
-        } else {
-            Log.d("LYRYX","PERMISSION DENIED")
-        }
-    }
-    val context = LocalContext.current
-    Button(
-        onClick = {
-            // Check permission
-            when (PackageManager.PERMISSION_GRANTED) {
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.RECORD_AUDIO
-                ) -> {
-                    // Some works that require permission
-                    Log.d("ExampleScreen","Code requires permission")
-                }
-                else -> {
-                    launcher.launch(Manifest.permission.RECORD_AUDIO)
-                }
-            }
-        }
-    ) {
-        Text(text = "Check and Request Permission")
-    }
-}
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LyricsScreenUI_Preview() {
@@ -318,7 +287,7 @@ fun LyricsScreenUI_Preview() {
     LyryxTheme {
         LyricsScreenUI(
             music = previewMusic,
-            currentLyric = "This is a sample lyric line that shows how text looks",
+            currentLyric = "",
             isPlaying = true,
             formattedTime = "02:30",
             isOnsetActive = true,

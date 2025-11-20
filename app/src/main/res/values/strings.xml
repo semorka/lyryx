@@ -16,7 +16,7 @@
 
     <plurals name="songs_found">
         <item quantity="one">Found 1 song</item>
-        <item quantity="other">Found 1 songs</item>
+        <item quantity="other">Found %d songs</item>
     </plurals>
     <string name="song_loading_text">Loading text of song</string>
     <string name="song_searching">Searching songs</string>

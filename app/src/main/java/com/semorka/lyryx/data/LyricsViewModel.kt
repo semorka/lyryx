@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel
 
 class LyricsViewModel(application: Application): ViewModel(), BaseLyricsViewModel{
 
-    val lyricsList: LiveData<List<LyricsEntity>>
+    override val lyricsList: LiveData<List<LyricsEntity>>
     private val repository: LyricsRepository
     override var artistName by mutableStateOf("")
     override var songName by mutableStateOf("")
@@ -24,7 +24,7 @@ class LyricsViewModel(application: Application): ViewModel(), BaseLyricsViewMode
         val lyricsDb = LyricsRoomDatabase.getInstance(application)
         val lyricsDao = lyricsDb.lyricsDao()
         repository = LyricsRepository(lyricsDao)
-        lyricsList = repository.userList
+        lyricsList = repository.songList
     }
 
     override fun changeArtistName(value: String){

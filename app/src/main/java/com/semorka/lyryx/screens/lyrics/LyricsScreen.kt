@@ -1,6 +1,7 @@
 package com.semorka.lyryx.screens.lyrics
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -42,6 +43,7 @@ import com.semorka.lyryx.PlayerViewModel
 import com.semorka.lyryx.music.Music
 import com.semorka.lyryx.ui.theme.LyryxTheme
 import kotlinx.coroutines.delay
+import kotlin.math.abs
 import kotlin.text.ifEmpty
 
 @Composable
@@ -83,17 +85,54 @@ fun MovingTextCopy(originalText: String, isActive: Boolean) {
     )
 }
 
-fun splitLyricIntoLines(lyrics: String, maxCharsPerLine: Int = 25): String {
+fun splitLyricIntoLines(lyrics: String, maxCharsPerLine: Int = 28): String {
     if (lyrics.length <= maxCharsPerLine) return lyrics
 
+    val naturalBreaks = listOf(",", " - ", "…", " – ", ";", "|", ":")
+
+    for (breakChar in naturalBreaks) {
+        if (lyrics.contains(breakChar)) {
+            val parts = lyrics.split(breakChar)
+            if (parts.size == 2) {
+                val firstPart = parts[0].trim()
+                val secondPart = parts[1].trim()
+                val lengthDiff = abs(firstPart.length - secondPart.length)
+
+                if (firstPart.length <= maxCharsPerLine + 5 &&
+                    secondPart.length <= maxCharsPerLine + 5 &&
+                    lengthDiff <= 10) {
+                    return "$firstPart\n$secondPart"
+                }
+            }
+        }
+    }
+
     val words = lyrics.split(" ")
+    if (words.size <= 1) return lyrics
+
     val lines = mutableListOf<String>()
     var currentLine = ""
 
-    for (word in words) {
-        if ("$currentLine $word".trim().length <= maxCharsPerLine) {
-            currentLine = "$currentLine $word".trim()
+    for (i in words.indices) {
+        val word = words[i]
+        val testLine = if (currentLine.isEmpty()) word else "$currentLine $word"
+
+        if (testLine.length <= maxCharsPerLine) {
+            currentLine = testLine
         } else {
+            if (i < words.size - 1) {
+                val nextWord = words[i + 1]
+                val lineWithNext = "$testLine $nextWord"
+                val currentLineLength = currentLine.length
+                val nextLineLength = if (i + 2 < words.size) words[i + 2].length else 0
+
+                if (lineWithNext.length <= maxCharsPerLine + 3 &&
+                    Math.abs(currentLineLength - nextLineLength) <= 8) {
+                    currentLine = testLine
+                    continue
+                }
+            }
+
             if (currentLine.isNotEmpty()) {
                 lines.add(currentLine)
             }
@@ -105,5 +144,84 @@ fun splitLyricIntoLines(lyrics: String, maxCharsPerLine: Int = 25): String {
         lines.add(currentLine)
     }
 
+    if (lines.size > 2) {
+        return balanceLines(lines, maxCharsPerLine)
+    }
+
     return lines.joinToString("\n")
+}
+
+private fun balanceLines(lines: List<String>, maxCharsPerLine: Int): String {
+    val result = lines.toMutableList()
+
+    for (i in 0 until result.size - 1) {
+        val currentLine = result[i]
+        val nextLine = result[i + 1]
+
+        val currentWords = currentLine.split(" ").toMutableList()
+        val nextWords = nextLine.split(" ").toMutableList()
+
+        if (currentLine.length < nextLine.length - 5 && currentWords.isNotEmpty() && nextWords.isNotEmpty()) {
+            val lastWordOfCurrent = currentWords.last()
+            val firstWordOfNext = nextWords.first()
+
+            if ("$lastWordOfCurrent $firstWordOfNext".length <= maxCharsPerLine) {
+                currentWords[currentWords.size - 1] = "$lastWordOfCurrent $firstWordOfNext"
+                nextWords.removeAt(0)
+
+                result[i] = currentWords.joinToString(" ")
+                result[i + 1] = nextWords.joinToString(" ")
+            }
+        }
+    }
+
+    return result.joinToString("\n")
+}
+
+fun calculateMaxCharsPerLine(currentLyric: String): Int {
+    val cleanLyric = currentLyric.ifEmpty { "♪" }
+
+    return when {
+        cleanLyric.any { it in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" } -> 24
+        cleanLyric.length > 60 -> 30
+        cleanLyric.length > 40 -> 28
+        else -> 26
+    }
+}
+
+fun calculateBaseTextSize(currentLyric: String): Float {
+    val cleanLyric = currentLyric.ifEmpty { "♫" }
+
+    val lineCount = cleanLyric.count { it == '\n' } + 1
+    val totalLength = cleanLyric.replace("\n", "").length
+
+    return when {
+        lineCount == 1 && totalLength <= 15 -> 32f
+        lineCount == 1 && totalLength <= 25 -> 28f
+        lineCount == 1 && totalLength <= 35 -> 24f
+        lineCount == 1 -> 22f
+
+        lineCount >= 2 && totalLength <= 30 -> 26f
+        lineCount >= 2 && totalLength <= 50 -> 24f
+        lineCount >= 2 -> 22f
+        else -> 20f
+    }
+}
+
+fun getScaleMultiplier(currentLyric: String): Float {
+    val cleanLyric = currentLyric.ifEmpty { "♪" }
+    val lineCount = cleanLyric.count { it == '\n' } + 1
+    val totalLength = cleanLyric.replace("\n", "").length
+
+    return when {
+        lineCount == 1 && totalLength <= 15 -> 1.15f
+        lineCount == 1 && totalLength <= 25 -> 1.12f
+        lineCount == 1 && totalLength <= 35 -> 1.08f
+        lineCount == 1 -> 1.05f
+
+        lineCount == 2 -> 1.18f
+        lineCount == 3 -> 1.15f
+        lineCount >= 4 -> 1.12f
+        else -> 1.10f
+    }
 }
