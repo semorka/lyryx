@@ -1,8 +1,8 @@
 # Lyryx - Music Player with Synchronized Lyrics
 
 ### APIs & Services
-- **[LRCLIB](https://lrclib.net/)** - Lyrics database and API
-- **[Genius](https://genius.com/developers)** - Song lyrics and metadata
+- **[Genius](https://genius.com/developers)** - Song discovery and metadata search
+- **[LRCLIB](https://lrclib.net/)** - Lyrics synchronization with timestamps
 - **[Supabase](https://supabase.com/)** - Backend and database services
 
 ## 🎥 Demonstration

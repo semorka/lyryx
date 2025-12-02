@@ -182,7 +182,7 @@ fun LoadTrackScreenPreviewDarkTheme(){
 
 @Composable
 fun TextCarousel(
-    texts: List<String> = listOf("LRCLIB", "GENIUS", "SUPABASE"),
+    texts: List<String> = listOf("GENIUS", "LRCLIB", "SUPABASE"),
     modifier: Modifier = Modifier
 ) {
     var currentIndex by remember { mutableIntStateOf(0) }
