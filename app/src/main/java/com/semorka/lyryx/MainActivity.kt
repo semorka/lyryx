@@ -9,8 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.semorka.lyryx.ui.theme.LyryxTheme
-import com.semorka.lyryx.ui.LyryxApp
+import com.semorka.lyryx.core.ui.theme.LyryxTheme
 
 
 class MainActivity : ComponentActivity() {

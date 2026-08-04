@@ -11,9 +11,6 @@ sealed class Destination {
     data object Search : Destination()
 
     @Serializable
-    data object Library : Destination()
-
-    @Serializable
     data object LyricsSearch : Destination()
 
     @Serializable
