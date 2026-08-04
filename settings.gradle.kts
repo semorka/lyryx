@@ -11,18 +11,18 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.10.0"
+}
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
-        maven {
-            url = uri("https://jitpack.io")
-            url = uri("https://mvn.0110.be/releases")
-        }
+        maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://mvn.0110.be/releases") }
     }
 }
 
 rootProject.name = "Lyryx"
 include(":app")
- 

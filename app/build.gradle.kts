@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,18 +8,31 @@ plugins {
     kotlin("plugin.serialization") version "2.2.21"
 }
 
+val localProperties = Properties().apply {
+    load(rootProject.file("local.properties").inputStream())
+}
+
+val supabaseUrl: String = localProperties.getProperty("SUPABASE_URL") ?: ""
+val supabaseKey: String = localProperties.getProperty("SUPABASE_KEY") ?: ""
+
 android {
     namespace = "com.semorka.lyryx"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.semorka.lyryx"
         minSdk = 24
-        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "SUPABASE_KEY", "\"$supabaseKey\"")
+        buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -29,47 +44,71 @@ android {
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1,INDEX.LIST,DEPENDENCIES,versions/9}"
+            merges += "META-INF/INDEX.LIST"
+            merges += "META-INF/DEPENDENCIES"
+            pickFirsts += "META-INF/INDEX.LIST"
+        }
     }
+
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+    kotlin {
+        jvmToolchain(21)
+    }
+
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "21"
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
 dependencies {
+    implementation(libs.androidx.compose.ui.unit)
+    implementation(libs.androidx.media3.session)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     implementation (libs.androidx.runtime.livedata)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.room.common.jvm)
     implementation(libs.androidx.compose.animation.core)
-    annotationProcessor(libs.androidx.room.room.compiler)
+    implementation(libs.androidx.compose.animation)
+    implementation(libs.androidx.media3.exoplayer)
     ksp(libs.androidx.room.room.compiler)
+
+    implementation(libs.androidx.media3.ui)
 
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
 
-    implementation("be.tarsos.dsp:core:2.5")
-    implementation("be.tarsos.dsp:jvm:2.5")
+    implementation("com.github.skydoves:cloudy:0.6.1")
 
+    implementation("com.github.xsoophx:Kymatik:0.1.0-beta")
     implementation("io.coil-kt:coil-compose:2.7.0")
-
     implementation("net.jthink:jaudiotagger:3.0.1")
 
-    implementation(platform("io.github.jan-tennert.supabase:bom:3.2.6"))
-    implementation("io.github.jan-tennert.supabase:functions-kt:3.2.6")
-    implementation("io.github.jan-tennert.supabase:postgrest-kt")
-    implementation("io.github.jan-tennert.supabase:auth-kt")
-    implementation("io.github.jan-tennert.supabase:realtime-kt")
-
-    implementation("io.ktor:ktor-client-android:3.3.1")
+    // KTOR and OKHTTP
+    val ktorVersion = "3.5.0"
+    implementation("io.ktor:ktor-client-core:${ktorVersion}")
+    implementation("io.ktor:ktor-client-okhttp-jvm:${ktorVersion}")
+    implementation("io.ktor:ktor-client-content-negotiation:${ktorVersion}")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:${ktorVersion}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     implementation("com.google.accompanist:accompanist-permissions:0.37.3")
+
+    implementation(platform("io.github.jan-tennert.supabase:bom:3.7.0"))
+
+    implementation("io.github.jan-tennert.supabase:functions-kt")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

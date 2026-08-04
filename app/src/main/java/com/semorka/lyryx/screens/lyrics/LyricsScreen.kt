@@ -1,24 +1,11 @@
 package com.semorka.lyryx.screens.lyrics
 
 import android.net.Uri
-import android.util.Log
-import androidx.compose.animation.animateColorAsState
+import androidx.annotation.OptIn
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,33 +14,32 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.semorka.lyryx.MockPlayerViewModel
-import com.semorka.lyryx.PlayerViewModel
-import com.semorka.lyryx.music.Music
-import com.semorka.lyryx.ui.theme.LyryxTheme
+import com.semorka.lyryx.sound.v2.ExoPlayerViewModel
+import com.semorka.lyryx.music.MusicViewModel
+import com.semorka.lyryx.net.word_lyrics.WordLyricsViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 import kotlin.text.ifEmpty
 
+@OptIn(UnstableApi::class)
 @Composable
-fun LyricsScreen(navController: NavController, music: Music, audioUri: Uri?, playerVm: PlayerViewModel, isPreview: Boolean = false) {
-    if (isPreview) {
-        LyricsScreenPreviewContent(music)
-    } else {
-        LyricsScreenRealContent(navController, music, audioUri, playerVm)
-    }
+fun LyricsScreen(
+    navController: NavController,
+    audioUri: Uri?,
+    playerVm: ExoPlayerViewModel?,
+    isPreview: Boolean = false,
+    musicVm: MusicViewModel,
+    wordsVm: WordLyricsViewModel
+) {
+    LyricsScreenContent(navController, audioUri, playerVm, musicVm, wordsVm)
 }
+
 @Composable
 fun MovingTextCopy(originalText: String, isActive: Boolean) {
     var animate by remember { mutableStateOf(false) }
@@ -127,7 +113,7 @@ fun splitLyricIntoLines(lyrics: String, maxCharsPerLine: Int = 28): String {
                 val nextLineLength = if (i + 2 < words.size) words[i + 2].length else 0
 
                 if (lineWithNext.length <= maxCharsPerLine + 3 &&
-                    Math.abs(currentLineLength - nextLineLength) <= 8) {
+                    abs(currentLineLength - nextLineLength) <= 8) {
                     currentLine = testLine
                     continue
                 }
@@ -196,15 +182,15 @@ fun calculateBaseTextSize(currentLyric: String): Float {
     val totalLength = cleanLyric.replace("\n", "").length
 
     return when {
-        lineCount == 1 && totalLength <= 15 -> 32f
-        lineCount == 1 && totalLength <= 25 -> 28f
-        lineCount == 1 && totalLength <= 35 -> 24f
-        lineCount == 1 -> 22f
+        lineCount == 1 && totalLength <= 15 -> 42f
+        lineCount == 1 && totalLength <= 25 -> 38f
+        lineCount == 1 && totalLength <= 35 -> 34f
+        lineCount == 1 -> 30f
 
-        lineCount >= 2 && totalLength <= 30 -> 26f
-        lineCount >= 2 && totalLength <= 50 -> 24f
-        lineCount >= 2 -> 22f
-        else -> 20f
+        lineCount >= 2 && totalLength <= 30 -> 36f
+        lineCount >= 2 && totalLength <= 50 -> 32f
+        lineCount >= 2 -> 30f
+        else -> 28f
     }
 }
 
@@ -214,14 +200,14 @@ fun getScaleMultiplier(currentLyric: String): Float {
     val totalLength = cleanLyric.replace("\n", "").length
 
     return when {
-        lineCount == 1 && totalLength <= 15 -> 1.15f
-        lineCount == 1 && totalLength <= 25 -> 1.12f
-        lineCount == 1 && totalLength <= 35 -> 1.08f
-        lineCount == 1 -> 1.05f
+        lineCount == 1 && totalLength <= 15 -> 1.25f
+        lineCount == 1 && totalLength <= 25 -> 1.20f
+        lineCount == 1 && totalLength <= 35 -> 1.15f
+        lineCount == 1 -> 1.10f
 
-        lineCount == 2 -> 1.18f
-        lineCount == 3 -> 1.15f
-        lineCount >= 4 -> 1.12f
-        else -> 1.10f
+        lineCount == 2 -> 1.28f
+        lineCount == 3 -> 1.22f
+        lineCount >= 4 -> 1.18f
+        else -> 1.15f
     }
 }

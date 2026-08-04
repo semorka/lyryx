@@ -4,31 +4,21 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,21 +28,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.media3.common.util.Log
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.semorka.lyryx.navigation.Destination
 import com.semorka.lyryx.R
-import com.semorka.lyryx.music.MockMusicViewModel
 import com.semorka.lyryx.music.MusicViewModel
-import com.semorka.lyryx.ui.theme.LyryxTheme
+import com.semorka.lyryx.net.word_lyrics.WordLyricsViewModel
 import kotlinx.coroutines.delay
 
 @Composable
@@ -86,29 +72,6 @@ fun LoadTrackScreen(
             )
 
             TextCarousel()
-
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalArrangement = Arrangement.Center
-//            ){
-//                Row(
-//                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-//                    verticalAlignment = Alignment.CenterVertically
-//                ){
-//                    Text(
-//                        text = "LRCLIB",
-//                        style = MaterialTheme.typography.bodyLarge
-//                    )
-//                    Text(
-//                        text = "GENIUS",
-//                        style = MaterialTheme.typography.bodyLarge
-//                    )
-//                    Text(
-//                        text = "SUPABASE",
-//                        style = MaterialTheme.typography.bodyLarge
-//                    )
-//                }
-//            }
         }
 
         Column(
@@ -131,7 +94,7 @@ fun LoadTrackScreen(
             viewModel.currentAudioUri?.let {
                 OutlinedButton(
                     onClick = {
-                        navController.navigate("Search")
+                        navController.navigate(Destination.Search)
                     },
                     modifier = Modifier.width(250.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
@@ -143,7 +106,7 @@ fun LoadTrackScreen(
                 }
                 OutlinedButton(
                     onClick = {
-                        navController.navigate("Library")
+                        navController.navigate(Destination.Library)
                     },
                     modifier = Modifier.width(250.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
@@ -158,31 +121,9 @@ fun LoadTrackScreen(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun LoadTrackScreenPreviewLightTheme(){
-    LyryxTheme(dynamicColor = false, darkTheme = false){
-        val viewModel = MockMusicViewModel.createMusicViewModel()
-        Surface(Modifier.systemBarsPadding(), color = MaterialTheme.colorScheme.background){
-            LoadTrackScreen(rememberNavController(), viewModel)
-        }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun LoadTrackScreenPreviewDarkTheme(){
-    LyryxTheme(dynamicColor = false, darkTheme = true){
-        val viewModel = MockMusicViewModel.createMusicViewModel()
-        Surface(Modifier.systemBarsPadding(), color = MaterialTheme.colorScheme.background){
-            LoadTrackScreen(rememberNavController(), viewModel)
-        }
-    }
-}
-
 @Composable
 fun TextCarousel(
-    texts: List<String> = listOf("GENIUS", "LRCLIB", "SUPABASE"),
+    texts: List<String> = listOf("DEEZER", "LRCLIB"),
     modifier: Modifier = Modifier
 ) {
     var currentIndex by remember { mutableIntStateOf(0) }

@@ -20,16 +20,20 @@ private val DarkColorScheme = darkColorScheme(
     primary = darkPrimaryColor,
     secondary = PurpleGrey80,
     onBackground = Color.White,
+    surface = Color.Black,
+    inverseSurface = Color.White,
     background = Color(0xFF131318),
-    tertiary = Pink80
+    tertiary = Pink80,
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = lightPrimaryColor,
     secondary = PurpleGrey40,
+    surface = Color.White,
+    inverseSurface = Color.Black,
     onBackground = Color.Black,
     background = Color(0xFFfcf8ff),
-    tertiary = Pink40
+    tertiary = Pink40,
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -43,11 +47,15 @@ private val LightColorScheme = lightColorScheme(
 )
 
 val ultraFontFamily = FontFamily(
-    Font(R.font.ultra_regular, FontWeight.Normal)
+    Font(R.font.ultra_regular)
 )
 
 val dmserifFontFamily = FontFamily(
-    Font(R.font.dmserif_text_regular, weight = FontWeight.Normal)
+    Font(R.font.dmserif_text_regular)
+)
+
+val helveticaFontFamily = FontFamily(
+    Font(R.font.helvetica_regular)
 )
 
 @Composable
