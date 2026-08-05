@@ -22,6 +22,7 @@ import com.semorka.lyryx.net.lrclib.LRCLibViewModel
 import com.semorka.lyryx.net.word_lyrics.WordLyricsViewModel
 import com.semorka.lyryx.core.sound.ExoPlayerViewModel
 import com.semorka.lyryx.core.sound.PlaybackService
+import com.semorka.lyryx.navigation.NavigationViewModel
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -54,5 +55,5 @@ fun LyryxApp(){
         }, MoreExecutors.directExecutor())
     }
 
-    AppNavigation(navController, musicVm, lyricsVm, playerVm, wordsVm)
+    AppNavigation(musicVm, lyricsVm, playerVm, wordsVm)
 }

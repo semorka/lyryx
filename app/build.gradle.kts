@@ -85,6 +85,11 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     ksp(libs.androidx.room.room.compiler)
 
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    implementation(libs.androidx.material3.adaptive.navigation3)
+
     implementation(libs.androidx.media3.ui)
 
     implementation(libs.retrofit)

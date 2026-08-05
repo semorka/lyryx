@@ -2,6 +2,7 @@ package com.semorka.lyryx.navigation
 
 import androidx.annotation.OptIn
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -18,42 +19,20 @@ import com.semorka.lyryx.core.ui.features.lyrics.presentation.LyricsScreen
 @OptIn(UnstableApi::class)
 @Composable
 fun AppNavigation(
-    navController: NavHostController,
     musicVm: MusicViewModel,
     lyricsVm: LRCLibViewModel,
     playerVm: ExoPlayerViewModel?,
     wordsVm: WordLyricsViewModel
 ) {
-    NavHost(
-        navController = navController,
-        startDestination = Destination.LoadTrack
-    ) {
-        composable<Destination.LoadTrack> {
-            LoadTrackScreen(
-                viewModel = musicVm,
-                onFileSelected = { navController.navigate(Destination.Search) }
-            )
-        }
-
-        composable<Destination.Search> {
-            SearchScreen(
-                musicVm,
-                lyricsVm,
-                wordsVm
-            ) {
-                navController.navigate(
-                    Destination.LyricsSearch
-                )
-            }
-        }
-
-        composable<Destination.LyricsSearch> {
-            LyricsSearchScreen(navController, lyricsVm, musicVm, wordsVm)
-        }
-
-        composable<Destination.Lyrics> {
-            LyricsScreen(musicVm.currentAudioUri, playerVm, musicVm = musicVm, wordsVm = wordsVm)
-        }
-
-    }
+    val navViewModel: NavigationViewModel = viewModel()
+    val backStack = navViewModel.backStack
+    AppNavigationV2(
+        navigationViewModel = navViewModel,
+        backStack = backStack,
+        onBack = { navViewModel.onBack() },
+        musicVm = musicVm,
+        lyricsVm = lyricsVm,
+        playerVm = playerVm,
+        wordsVm = wordsVm
+    )
 }

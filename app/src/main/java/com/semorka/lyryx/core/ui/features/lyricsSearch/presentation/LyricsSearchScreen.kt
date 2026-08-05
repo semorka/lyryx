@@ -19,7 +19,7 @@ import com.semorka.lyryx.net.lrclib.LRCLibViewModel
 import com.semorka.lyryx.net.word_lyrics.WordLyricsViewModel
 
 @Composable
-fun LyricsSearchScreen(navController: NavController, lyricsVm: LRCLibViewModel, musicVm: MusicViewModel, wordLyricsViewModel: WordLyricsViewModel){
+fun LyricsSearchScreen(lyricsVm: LRCLibViewModel, musicVm: MusicViewModel, wordLyricsViewModel: WordLyricsViewModel, onLyricsSelected: () -> Unit){
     val tracks by lyricsVm.lyricsState.collectAsStateWithLifecycle()
     val isLoading by lyricsVm.isLoading.collectAsStateWithLifecycle()
     val isLoading2 by wordLyricsViewModel.isLoading.collectAsStateWithLifecycle()
@@ -33,7 +33,7 @@ fun LyricsSearchScreen(navController: NavController, lyricsVm: LRCLibViewModel, 
         }
     }
     else if(isWordSynced) {
-        navController.navigate(Destination.Lyrics)
+        onLyricsSelected()
 
         // TODO
 //        LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)){

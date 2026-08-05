@@ -289,7 +289,6 @@ private fun WrappingWordsLayout(
             lines += LineInfo(currentIndices, lineHeight)
         }
 
-        // Сообщаем наружу индексы слов, оказавшихся единственными в своей строке
         val singleWordIndices = lines
             .filter { it.indices.size == 1 }
             .map { it.indices.first() }
