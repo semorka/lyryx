@@ -1,8 +1,8 @@
-package com.semorka.lyryx.net.word_lyrics
+package com.semorka.lyryx.core.net.word_lyrics
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.semorka.lyryx.net.supabase.supabase
+import com.semorka.lyryx.core.net.supabase.supabase
 import io.github.jan.supabase.functions.functions
 import io.ktor.client.call.body
 import kotlinx.coroutines.flow.MutableStateFlow

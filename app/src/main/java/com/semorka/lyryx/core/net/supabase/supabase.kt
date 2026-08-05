@@ -1,4 +1,4 @@
-package com.semorka.lyryx.net.supabase
+package com.semorka.lyryx.core.net.supabase
 
 import com.semorka.lyryx.BuildConfig
 import io.github.jan.supabase.createSupabaseClient

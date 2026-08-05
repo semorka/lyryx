@@ -19,13 +19,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.UnstableApi
 import com.semorka.lyryx.core.sound.ExoPlayerViewModel
 import com.semorka.lyryx.core.music.MusicViewModel
-import com.semorka.lyryx.core.ui.components.AlbumCoverBackground
-import com.semorka.lyryx.net.word_lyrics.LyricSegment
-import com.semorka.lyryx.net.word_lyrics.WordLyricsViewModel
+import com.semorka.lyryx.core.net.word_lyrics.LyricSegment
+import com.semorka.lyryx.core.net.word_lyrics.WordLyricsViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import java.util.Locale
@@ -62,6 +62,11 @@ fun LyricsScreen(
         if (audioUri != null) {
             playerVm.setMedia(audioUri)
         }
+        playerVm.updateCurrentMediaMetadata(
+            coverUri = musicVm.track?.cover?.toUri(),
+            artist = musicVm.track?.artistName,
+            title = musicVm.track?.title
+        )
     }
 
     val isPlaying by playerVm.isPlaying.collectAsState()
@@ -93,7 +98,7 @@ fun LyricsScreen(
         onPlayPause = {
             playerVm.togglePlay()
         },
-        trackName = musicVm.track!!.trackName,
+        trackName = musicVm.track!!.title,
         artistName = musicVm.track!!.artistName,
         currentSegment = currentSegment,
         currentTime = smoothTime,

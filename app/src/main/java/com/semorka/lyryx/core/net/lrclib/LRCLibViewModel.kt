@@ -1,8 +1,8 @@
-package com.semorka.lyryx.net.lrclib
+package com.semorka.lyryx.core.net.lrclib
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.semorka.lyryx.net.networkClient
+import com.semorka.lyryx.core.net.networkClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter

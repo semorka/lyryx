@@ -14,21 +14,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
-import androidx.navigation.compose.rememberNavController
 import com.google.common.util.concurrent.MoreExecutors
 import com.semorka.lyryx.core.music.MusicViewModel
-import com.semorka.lyryx.navigation.AppNavigation
-import com.semorka.lyryx.net.lrclib.LRCLibViewModel
-import com.semorka.lyryx.net.word_lyrics.WordLyricsViewModel
+import com.semorka.lyryx.core.navigation.AppNavigation
+import com.semorka.lyryx.core.net.lrclib.LRCLibViewModel
+import com.semorka.lyryx.core.net.word_lyrics.WordLyricsViewModel
 import com.semorka.lyryx.core.sound.ExoPlayerViewModel
 import com.semorka.lyryx.core.sound.PlaybackService
-import com.semorka.lyryx.navigation.NavigationViewModel
 
 @OptIn(UnstableApi::class)
 @Composable
 fun LyryxApp(){
     val context = LocalContext.current
-    val navController = rememberNavController()
     val musicVm: MusicViewModel = viewModel()
     val lyricsVm: LRCLibViewModel = viewModel()
     val wordsVm: WordLyricsViewModel = viewModel()

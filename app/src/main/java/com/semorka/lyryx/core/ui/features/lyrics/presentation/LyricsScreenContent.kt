@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.semorka.lyryx.R
 import com.semorka.lyryx.core.ui.components.AlbumCoverBackground
-import com.semorka.lyryx.net.word_lyrics.LyricSegment
-import com.semorka.lyryx.net.word_lyrics.WordSegment
+import com.semorka.lyryx.core.net.word_lyrics.LyricSegment
+import com.semorka.lyryx.core.net.word_lyrics.WordSegment
 import com.semorka.lyryx.core.ui.components.CenteredLyricWordView
 import com.semorka.lyryx.core.ui.features.lyrics.PlayPauseButton
 import com.semorka.lyryx.core.ui.theme.LyryxTheme

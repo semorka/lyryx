@@ -1,4 +1,4 @@
-package com.semorka.lyryx.net.deezer
+package com.semorka.lyryx.core.net.deezer
 
 import kotlinx.serialization.Serializable
 

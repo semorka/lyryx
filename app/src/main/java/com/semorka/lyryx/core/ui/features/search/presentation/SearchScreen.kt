@@ -9,10 +9,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,9 +36,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.semorka.lyryx.R
 import com.semorka.lyryx.core.data.Track
-import com.semorka.lyryx.net.deezer.DeezerViewModel
-import com.semorka.lyryx.net.lrclib.LRCLibViewModel
-import com.semorka.lyryx.net.word_lyrics.WordLyricsViewModel
+import com.semorka.lyryx.core.net.deezer.DeezerViewModel
+import com.semorka.lyryx.core.net.lrclib.LRCLibViewModel
+import com.semorka.lyryx.core.net.word_lyrics.WordLyricsViewModel
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import java.io.File
@@ -117,7 +115,7 @@ fun SearchScreen(
                 Row(modifier = Modifier.clickable(onClick = {
                     musicVm.track = Track(
                         artistName = track.artist.name,
-                        trackName = track.title,
+                        title = track.title,
                         cover = track.album.cover_medium,
                         plainLyrics = ""
                     )

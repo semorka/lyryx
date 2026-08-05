@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.semorka.lyryx.net.word_lyrics.LyricSegment
+import com.semorka.lyryx.core.net.word_lyrics.LyricSegment
 import com.semorka.lyryx.core.ui.theme.helveticaFontFamily
 import kotlin.math.max
 

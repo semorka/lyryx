@@ -11,12 +11,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.semorka.lyryx.R
 import com.semorka.lyryx.core.music.MusicViewModel
-import com.semorka.lyryx.navigation.Destination
-import com.semorka.lyryx.net.lrclib.LRCLibViewModel
-import com.semorka.lyryx.net.word_lyrics.WordLyricsViewModel
+import com.semorka.lyryx.core.net.lrclib.LRCLibViewModel
+import com.semorka.lyryx.core.net.word_lyrics.WordLyricsViewModel
 
 @Composable
 fun LyricsSearchScreen(lyricsVm: LRCLibViewModel, musicVm: MusicViewModel, wordLyricsViewModel: WordLyricsViewModel, onLyricsSelected: () -> Unit){

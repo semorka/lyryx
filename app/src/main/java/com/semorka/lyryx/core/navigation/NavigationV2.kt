@@ -1,4 +1,4 @@
-package com.semorka.lyryx.navigation
+package com.semorka.lyryx.core.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavEntry
@@ -9,8 +9,8 @@ import com.semorka.lyryx.core.ui.features.loadtrack.presentation.LoadTrackScreen
 import com.semorka.lyryx.core.ui.features.lyrics.presentation.LyricsScreen
 import com.semorka.lyryx.core.ui.features.lyricsSearch.presentation.LyricsSearchScreen
 import com.semorka.lyryx.core.ui.features.search.presentation.SearchScreen
-import com.semorka.lyryx.net.lrclib.LRCLibViewModel
-import com.semorka.lyryx.net.word_lyrics.WordLyricsViewModel
+import com.semorka.lyryx.core.net.lrclib.LRCLibViewModel
+import com.semorka.lyryx.core.net.word_lyrics.WordLyricsViewModel
 
 @Composable fun AppNavigationV2(
     backStack: List<Destination>,
@@ -27,9 +27,9 @@ import com.semorka.lyryx.net.word_lyrics.WordLyricsViewModel
         entryProvider = { key ->
             when (key) {
                 Destination.LoadTrack -> NavEntry(key) {
-                    LoadTrackScreen(musicVm) { navigationViewModel.navigateTo(Destination.Search)}
+                    LoadTrackScreen(musicVm) { navigationViewModel.navigateTo(Destination.SearchFlow.TrackSearch)}
                 }
-                Destination.Lyrics -> NavEntry(key) {
+                Destination.Lyrics-> NavEntry(key) {
                     LyricsScreen(
                         audioUri = musicVm.currentAudioUri,
                         playerVm = playerVm,
@@ -37,20 +37,20 @@ import com.semorka.lyryx.net.word_lyrics.WordLyricsViewModel
                         wordsVm = wordsVm,
                     )
                 }
-                Destination.Search -> NavEntry(key) {
+                Destination.SearchFlow.TrackSearch -> NavEntry(key) {
                     SearchScreen(
                         musicVm = musicVm,
                         lyricsVm = lyricsVm,
                         wordsVm = wordsVm,
-                        onTrackSelected = { navigationViewModel.navigateTo(Destination.LyricsSearch)}
+                        onTrackSelected = { navigationViewModel.navigateTo(Destination.SearchFlow.LyricsSearch)}
                     )
                 }
-                Destination.LyricsSearch -> NavEntry(key) {
+                Destination.SearchFlow.LyricsSearch -> NavEntry(key) {
                     LyricsSearchScreen(
                         lyricsVm = lyricsVm,
                         musicVm = musicVm,
                         wordLyricsViewModel = wordsVm,
-                        onLyricsSelected = { navigationViewModel.navigateTo(Destination.Lyrics)}
+                        onLyricsSelected = { navigationViewModel.finishSearchAndOpenPlayer() }
                     )
                 }
             }

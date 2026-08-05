@@ -1,4 +1,4 @@
-package com.semorka.lyryx.net.word_lyrics
+package com.semorka.lyryx.core.net.word_lyrics
 
 import java.util.regex.Pattern
 
