@@ -15,8 +15,13 @@ import kotlinx.coroutines.launch
 class DeezerViewModel: ViewModel(){
     private val _trackState = MutableStateFlow<List<DeezerTrack>>(emptyList())
     val trackState = _trackState.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    var isLoading = _isLoading.asStateFlow()
+
     fun findTrack(query: String) {
         viewModelScope.launch {
+            _isLoading.value = true
             try {
                 val response = networkClient.get("https://api.deezer.com/search") {
                     parameter("q", query)
@@ -28,6 +33,8 @@ class DeezerViewModel: ViewModel(){
             } catch (e: Exception) {
                 e.printStackTrace()
                 _trackState.value = emptyList()
+            } finally {
+                _isLoading.value = false
             }
         }
     }

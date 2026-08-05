@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.unit.dp
 import com.semorka.lyryx.core.music.MusicViewModel
 import androidx.compose.ui.res.stringResource
@@ -57,9 +58,7 @@ fun SearchScreen(
 
     val deezerVm: DeezerViewModel = viewModel()
     val tracks by deezerVm.trackState.collectAsStateWithLifecycle()
-
-    val fileName =
-        musicVm.currentAudioUri?.let { getFileName(LocalContext.current, it) } ?: "Unknown"
+    val isLoading by deezerVm.isLoading.collectAsStateWithLifecycle()
 
     LaunchedEffect(musicVm.currentAudioUri) {
         musicVm.currentAudioUri?.let { uri ->
@@ -68,6 +67,7 @@ fun SearchScreen(
             songNameSearch = info.title
             artistNameSearch = info.artist
         }
+        deezerVm.findTrack("$artistNameSearch $songNameSearch")
     }
 
     Column(
@@ -75,11 +75,6 @@ fun SearchScreen(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            if (musicVm.currentAudioUri != null) {
-                Text("${stringResource(R.string.file_name)}: $fileName")
-                Spacer(Modifier.height(8.dp))
-            }
-
             OutlinedTextField(
                 value = songNameSearch,
                 onValueChange = { songNameSearch = it },
@@ -97,15 +92,25 @@ fun SearchScreen(
                 onClick = {
                     deezerVm.findTrack("$artistNameSearch $songNameSearch")
                 },
+                enabled = !isLoading,
                 shape = RoundedCornerShape(25),
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
             ) {
-                Text("Search", style = MaterialTheme.typography.labelMedium)
+                Text(stringResource(R.string.search), style = MaterialTheme.typography.labelMedium)
             }
         }
+        if (!isLoading) {
+            if (tracks.isNotEmpty()) {
+                Text(pluralStringResource(R.plurals.songs_found, tracks.size, tracks.size))
+            }
+            else {
+                Text(stringResource(R.string.search_nothing))
+            }
+        } else {
+            Text(stringResource(R.string.song_searching))
+        }
 
-        Text(musicVm.searchText)
 
         LazyColumn {
             items(tracks) { track ->

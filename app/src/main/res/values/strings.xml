@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Lyryx</string>
-    <string name="choose_audio">choose audio</string>
+    <string name="app_name" translatable="false">Lyryx</string>
+    <string name="choose_audio">Choose audio file</string>
     <string name="name">Name</string>
     <string name="artist">Artist</string>
     <string name="search">Search</string>
@@ -22,4 +22,5 @@
     <string name="song_searching">Searching songs</string>
     <string name="search_nothing">Nothing found</string>
     <string name="file_name">File name</string>
+    <string name="lyrics_plain_warning">Word-by-Word Unavailable. This song lacks word timing. By-line mode is under development</string>
 </resources>

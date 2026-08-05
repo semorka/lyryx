@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Lyryx</string>
-    <string name="choose_audio">выбрать аудио</string>
+
+    <string name="choose_audio">Выбрать аудио файл</string>
     <string name="name">Название</string>
     <string name="artist">Исполнитель</string>
     <string name="search">Найти</string>
@@ -17,4 +17,5 @@
     <string name="song_searching">Ищем песни</string>
     <string name="search_nothing">Ничего не найдено</string>
     <string name="file_name">Название файла</string>
+    <string name="lyrics_plain_warning">По-словно недоступно. Эта песня не имеет таймингов по словам. Режим по строкам в разработке</string>
 </resources>

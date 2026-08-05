@@ -111,21 +111,22 @@ fun CenteredLyricWordView(
                         this@onDrawWithContent.drawContent()
                     }
 
-                    val bmp = meshBitmap
-                    if (bmp != null && bmp.width > 0 && bmp.height > 0) {
-                        // 2. Искажаем последний доступный снапшот через drawBitmapMesh.
-                        drawIntoCanvas { canvas ->
-                            canvas.nativeCanvas.drawBitmapMesh(
-                                bmp.asAndroidBitmap(),
-                                cols, rows,
-                                verts, 0,
-                                null, 0,
-                                null
-                            )
+                    try {
+                        val bmp = meshBitmap
+                        if (bmp != null && bmp.width > 0 && bmp.height > 0) {
+                            drawIntoCanvas { canvas ->
+                                canvas.nativeCanvas.drawBitmapMesh(
+                                    bmp.asAndroidBitmap(),
+                                    cols, rows,
+                                    verts, 0,
+                                    null, 0,
+                                    null
+                                )
+                            }
+                        } else {
+                            drawLayer(contentLayer)
                         }
-                    } else {
-                        // Пока снапшот ещё не готов (первый кадр) — рисуем как есть,
-                        // без искажения, чтобы не было пустого экрана.
+                    } catch (e: Exception) {
                         drawLayer(contentLayer)
                     }
                 }

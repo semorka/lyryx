@@ -9,8 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.semorka.lyryx.R
 import com.semorka.lyryx.core.music.MusicViewModel
 import com.semorka.lyryx.navigation.Destination
 import com.semorka.lyryx.net.lrclib.LRCLibViewModel
@@ -64,9 +66,7 @@ fun LyricsSearchScreen(navController: NavController, lyricsVm: LRCLibViewModel, 
 //        }
     } else {
         Column {
-            Text("Word-by-Word Unavailable")
-            Text("This song lacks word timing")
-            Text("Plain mode is under development")
+            Text(stringResource(R.string.lyrics_plain_warning))
         }
     }
 
