@@ -20,9 +20,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.UnstableApi
-import com.semorka.lyryx.core.sound.ExoPlayerViewModel
+import com.semorka.lyryx.core.sound.PlayerViewModel
 import com.semorka.lyryx.core.music.MusicViewModel
 import com.semorka.lyryx.core.net.word_lyrics.LyricSegment
 import com.semorka.lyryx.core.net.word_lyrics.WordLyricsViewModel
@@ -35,9 +36,9 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun LyricsScreen(
     audioUri: Uri?,
-    playerVm: ExoPlayerViewModel?,
-    musicVm: MusicViewModel,
-    wordsVm: WordLyricsViewModel
+    playerVm: PlayerViewModel = hiltViewModel(),
+    musicVm: MusicViewModel = hiltViewModel(),
+    wordsVm: WordLyricsViewModel = hiltViewModel()
 ) {
     val segments by wordsVm.lyricsSegments.collectAsStateWithLifecycle()
 
@@ -49,13 +50,6 @@ fun LyricsScreen(
         onDispose {
             window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
-    }
-
-    if (playerVm == null) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
     }
 
     LaunchedEffect(audioUri) {

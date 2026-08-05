@@ -19,38 +19,11 @@ import com.semorka.lyryx.core.music.MusicViewModel
 import com.semorka.lyryx.core.navigation.AppNavigation
 import com.semorka.lyryx.core.net.lrclib.LRCLibViewModel
 import com.semorka.lyryx.core.net.word_lyrics.WordLyricsViewModel
-import com.semorka.lyryx.core.sound.ExoPlayerViewModel
+import com.semorka.lyryx.core.sound.PlayerViewModel
 import com.semorka.lyryx.core.sound.PlaybackService
 
 @OptIn(UnstableApi::class)
 @Composable
 fun LyryxApp(){
-    val context = LocalContext.current
-    val musicVm: MusicViewModel = viewModel()
-    val lyricsVm: LRCLibViewModel = viewModel()
-    val wordsVm: WordLyricsViewModel = viewModel()
-    var playerVm by remember { mutableStateOf<ExoPlayerViewModel?>(null) }
-
-    val sessionToken =
-        remember { SessionToken(context, ComponentName(context, PlaybackService::class.java)) }
-    val controllerFuture = remember { MediaController.Builder(context, sessionToken).buildAsync() }
-
-    DisposableEffect(controllerFuture) {
-        onDispose {
-            MediaController.releaseFuture(controllerFuture)
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        controllerFuture.addListener({
-            try {
-                val player = controllerFuture.get()
-                playerVm = ExoPlayerViewModel(player)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }, MoreExecutors.directExecutor())
-    }
-
-    AppNavigation(musicVm, lyricsVm, playerVm, wordsVm)
+    AppNavigation()
 }

@@ -3,10 +3,12 @@ package com.semorka.lyryx.core.net.lrclib
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.semorka.lyryx.core.net.networkClient
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.http.isSuccess
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -38,7 +40,8 @@ data class LRCLibTrack(
         get() = parsedSegments.any { it.timeMillis > 0L }
 }
 
-class LRCLibViewModel : ViewModel() {
+@HiltViewModel
+class LRCLibViewModel @Inject constructor():  ViewModel() {
     private val _lyricsState = MutableStateFlow<List<LRCLibTrack>>(emptyList())
     val lyricsState = _lyricsState.asStateFlow()
 

@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.devtoolsKsp)
     kotlin("plugin.serialization") version "2.2.21"
+    id("com.google.dagger.hilt.android")
 }
 
 val localProperties = Properties().apply {
@@ -73,6 +74,11 @@ android {
 }
 
 dependencies {
+    // Dagger Hilt
+    implementation("com.google.dagger:hilt-android:2.60.1")
+    ksp("com.google.dagger:hilt-android-compiler:2.60.1")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
     implementation(libs.androidx.compose.ui.unit)
     implementation(libs.androidx.media3.session)
     implementation(libs.androidx.room.runtime)

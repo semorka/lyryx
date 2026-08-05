@@ -3,8 +3,10 @@ package com.semorka.lyryx.core.net.word_lyrics
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.semorka.lyryx.core.net.supabase.supabase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.functions.functions
 import io.ktor.client.call.body
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +15,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class WordLyricsViewModel : ViewModel() {
+@HiltViewModel
+class WordLyricsViewModel @Inject constructor(): ViewModel() {
 
     private val _lyricsSegments = MutableStateFlow<List<LyricSegment>>(emptyList())
     val lyricsSegments = _lyricsSegments.asStateFlow()
